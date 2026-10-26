@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Γλωσσάρι: Η μουσική στην αρχαία Ελλάδα</title>
+<style>
+:root{--bg:#f6ecd9;--card:#fffaf0;--ink:#2b1d14;--acc:#b9482a;--gold:#d9a441;--line:#e0cfae;--hl:#f9dc8f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1611;--card:#2a2019;--ink:#f3e6cf;--acc:#e0714b;--gold:#e5b655;--line:#4a3a2c;--hl:#5b4520}}
+:root[data-theme="dark"]{--bg:#1d1611;--card:#2a2019;--ink:#f3e6cf;--acc:#e0714b;--gold:#e5b655;--line:#4a3a2c;--hl:#5b4520}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Palatino Linotype",serif;font-size:18px;line-height:1.6}
+#app{max-width:760px;margin:0 auto;padding:14px 14px 190px}
+.meander{height:12px;background:repeating-linear-gradient(90deg,var(--acc) 0 14px,transparent 14px 20px,var(--acc) 20px 24px,transparent 24px 34px);opacity:.8;border-radius:3px;margin:6px 0 12px}
+h1{font-size:1.65rem;color:var(--acc);margin:.2em 0}
+h2{font-size:1.25rem;margin:1.2em 0 .4em}
+.box{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+.box p{margin:.5em 0}
+.hint{font-size:.88rem;opacity:.8}
+.t{font:inherit;color:inherit;background:none;border:0;padding:0 2px;cursor:pointer;border-bottom:2px dotted var(--acc)}
+.t.m{font-weight:bold;background:var(--hl);border-radius:4px;border-bottom:2px solid var(--acc);padding:0 4px}
+.t:hover,.t:focus-visible{background:var(--hl);outline:none}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+input[type=search]{flex:1 1 220px;font:inherit;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.chip,.btn{font:inherit;font-size:.9rem;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:5px 12px;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn{border-radius:10px}
+.grid{display:grid;gap:10px}
+.c{background:var(--card);border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.c.flash{border-color:var(--acc);box-shadow:0 0 0 3px var(--hl)}
+.c>button{width:100%;display:flex;gap:10px;align-items:center;text-align:left;font:inherit;font-weight:bold;color:inherit;background:none;border:0;padding:12px 14px;cursor:pointer}
+.c .em{font-size:1.5rem}.c .tag{margin-left:auto;font-size:.75rem;font-weight:normal;opacity:.7}
+.c .body{display:none;padding:0 14px 14px}
+.c.open .body{display:block}
+.ex{font-size:.95rem;border-left:4px solid var(--gold);padding-left:10px;margin-top:8px}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:4px solid var(--acc);padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .25s;box-shadow:0 -6px 20px rgba(0,0,0,.25);max-height:60vh;overflow:auto}
+#sheet.show{transform:none}
+#sheet .in{max-width:760px;margin:0 auto;position:relative}
+#sheet h3{margin:0 0 4px;font-size:1.2rem;color:var(--acc)}
+#x{position:absolute;right:0;top:0}
+.none{text-align:center;opacity:.7;padding:20px}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="meander"></div>
+<h1>🏺 Γλωσσάρι: Η μουσική στην αρχαία Ελλάδα</h1>
+<div class="box">
+<p id="p1"></p><p id="p2"></p><p id="p3"></p>
+<p class="hint">👆 Πάτα τις <b>έντονες</b> λέξεις (και αυτές με τις τελείες) για να δεις τι σημαίνουν.</p>
+</div>
+<h2>📖 Όλοι οι όροι</h2>
+<div class="bar"><input type="search" id="q" placeholder="🔍 Ψάξε έναν όρο…" aria-label="Αναζήτηση"></div>
+<div class="bar" id="chips"></div>
+<div class="bar"><button class="btn" id="tg">Άνοιγμα όλων</button><span class="hint" id="n"></span></div>
+<div class="grid" id="list"></div>
+</div>
+<div id="sheet" role="dialog" aria-live="polite"><div class="in"><button class="btn" id="x" aria-label="Κλείσιμο">✕</button><div id="sb"></div></div></div>
+<script>
+const CATS=["Όλα","Έννοιες","Πρόσωπα","Όργανα","Γιορτές και αγώνες"];
+// [κλειδί, όρος, κατηγορία, emoji, ορισμός, παράδειγμα, κύριος όρος του κειμένου]
+const D=[
+["theia","Θεϊκή προέλευση","Έννοιες","✨","Όταν κάτι έχει έρθει από τους θεούς. Οι αρχαίοι Έλληνες πίστευαν ότι η μουσική ήταν δώρο των θεών.","Ο Απόλλων και οι Μούσες θεωρούνταν προστάτες της μουσικής.",1],
+["idiot","Ιδιωτική και κοινωνική ζωή","Έννοιες","🏠","Ιδιωτική ζωή είναι ό,τι συμβαίνει στο σπίτι και στην οικογένεια. Κοινωνική ζωή είναι ό,τι συμβαίνει μαζί με άλλους ανθρώπους, σε γιορτές και συγκεντρώσεις.","Σε γάμους, συμπόσια και γιορτές η μουσική ήταν παντού.",1],
+["ekpaid","Εκπαίδευση των νέων","Έννοιες","🎓","Η μάθηση των παιδιών και των εφήβων. Στην αρχαία Ελλάδα περιλάμβανε βασικά τη μουσική και τη γυμναστική.","Ο Ιφικλής μαθαίνει λύρα από τον δάσκαλό του, τον Λίνο.",1],
+["amor","Αμόρφωτος","Έννοιες","📚","Αυτός που δεν έχει μορφωθεί αρκετά. Για τους αρχαίους, αμόρφωτος ήταν όποιος δεν ήξερε να παίζει ένα όργανο και να τραγουδά.","Σήμερα σκεφτόμαστε τι πρέπει να ξέρει κάποιος για να θεωρείται μορφωμένος.",1],
+["sokr","Σωκράτης","Πρόσωπα","🧔","Ο μεγάλος φιλόσοφος της αρχαίας Αθήνας. Επειδή δεν ήξερε μουσική, άρχισε να παρακολουθεί μαθήματα σε μεγάλη ηλικία.","Ακόμη και ο Σωκράτης πίστευε ότι η μουσική ήταν απαραίτητη για τη μόρφωση!"],
+["arch","Αρχαιολογικά ευρήματα","Έννοιες","🏺","Αντικείμενα από το παρελθόν που βρίσκουν οι αρχαιολόγοι, όπως αγγεία, αγάλματα και ειδώλια.","Από τα αγγεία και τα ειδώλια μαθαίνουμε πώς έπαιζαν μουσική οι αρχαίοι."],
+["sympo","Συμπόσιο","Γιορτές και αγώνες","🍇","Συγκέντρωση φίλων με φαγητό, συζήτηση, τραγούδι και μουσική.","Στα συμπόσια η μουσική ήταν απαραίτητη."],
+["gyn","Γυναικωνίτης","Έννοιες","🪟","Ο χώρος του αρχαίου σπιτιού όπου έμεναν και δούλευαν οι γυναίκες.","Εκεί στόλιζαν τη νύφη τραγουδώντας γαμήλια τραγούδια."],
+["apol","Απόλλων","Πρόσωπα","☀️","Ο θεός της μουσικής, του φωτός και της ποίησης. Παίζει λύρα ή κιθάρα.","Στη βάση της Μαντινείας ο Απόλλων εικονίζεται με τον Μαρσύα."],
+["mous","Μούσες","Πρόσωπα","🎭","Εννέα θεές που προστάτευαν τις τέχνες και τις επιστήμες. Από το όνομά τους βγαίνει η λέξη «μουσική».","Οι ποιητές ζητούσαν την έμπνευση των Μουσών."],
+["linos","Λίνος","Πρόσωπα","👴","Ο δάσκαλος μουσικής που εικονίζεται σε αγγείο να διδάσκει λύρα στον μαθητή του Ιφικλή.","Η αγγειογραφία βρίσκεται στο μουσείο Schwerin."],
+["rhapsodos","Ραψωδός","Πρόσωπα","📜","Ο καλλιτέχνης που στεκόταν όρθιος και απάγγελλε έπη, συχνά με συνοδεία κιθάρας.","Ο ραψωδός μάζευε τους πολίτες στην αγορά."],
+["epos","Έπος","Έννοιες","📖","Μεγάλο ποίημα που διηγείται τα κατορθώματα ηρώων, όπως η Ιλιάδα και η Οδύσσεια.","Οι ραψωδοί απάγγελλαν έπη."],
+["rhapsodia","Ραψωδία","Γιορτές και αγώνες","🎤","Η απαγγελία επών από τον ραψωδό. Οι αγώνες ραψωδίας έκλειναν τις μεγάλες γιορτές.","Ο νικητής έπαιρνε στεφάνι."],
+["avlos","Αυλός","Όργανα","🎶","Πνευστό όργανο, που το φυσούσαν για να βγει ήχος. Συχνά είχε δύο σωλήνες.","Ο Μαρσύας έπαιζε αυλό. Στα πλοία ο αυλητής έδινε τον ρυθμό στους κωπηλάτες."],
+["kithara","Κιθάρα","Όργανα","🪕","Έγχορδο όργανο με μεγάλο ξύλινο σώμα, που το έπαιζαν οι επαγγελματίες μουσικοί.","Ο ραψωδός συνοδευόταν από κιθάρα."],
+["lyra","Λύρα","Όργανα","🎼","Έγχορδο όργανο με δύο καμπύλα μπράτσα. Ήταν το όργανο των μαθητών.","Ο Ιφικλής μαθαίνει λύρα στο μάθημά του."],
+["avlit","Αυλητική","Γιορτές και αγώνες","🏁","Μουσικός αγώνας όπου ο διαγωνιζόμενος παίζει μόνο αυλό.","Μόνο όργανο, χωρίς τραγούδι."],
+["avlod","Αυλωδία","Γιορτές και αγώνες","🏁","Μουσικός αγώνας όπου ο διαγωνιζόμενος τραγουδά και παίζει αυλό.","Η κατάληξη «-ωδία» σημαίνει ότι υπάρχει τραγούδι."],
+["kithar","Κιθαριστική","Γιορτές και αγώνες","🏁","Μουσικός αγώνας όπου ο διαγωνιζόμενος παίζει μόνο κιθάρα.","Μόνο όργανο, χωρίς τραγούδι."],
+["kithard","Κιθαρωδία","Γιορτές και αγώνες","🏁","Μουσικός αγώνας όπου ο διαγωνιζόμενος τραγουδά και παίζει κιθάρα.","Ο κιθαρωδός τραγουδά και συνοδεύεται από τη δική του κιθάρα."],
+["agon","Μουσικοί αγώνες","Γιορτές και αγώνες","🏆","Διαγωνισμοί μουσικής που γίνονταν στις μεγάλες γιορτές και κρατούσαν μέρες.","Αγώνες αυλητικής, κιθαριστικής, αυλωδίας, κιθαρωδίας και ραψωδίας."],
+["stef","Στεφάνι","Γιορτές και αγώνες","🌿","Το βραβείο του νικητή, φτιαγμένο από κλαδιά ελιάς, κισσού ή μυρτιάς.","Σήμερα τα έπαθλα είναι κύπελλα και μετάλλια."],
+["ymnos","Ύμνος","Γιορτές και αγώνες","🙏","Τραγούδι προς τιμήν ενός θεού.","Οι ιερείς και η χορωδία έψαλλαν ύμνους."],
+["pompi","Πομπή","Γιορτές και αγώνες","🚶","Οργανωμένη πορεία πολλών ανθρώπων, που διασχίζουν την πόλη για μια γιορτή.","Η πομπή κατέληγε στο ιερό του θεού."],
+["ieron","Ιερό","Γιορτές και αγώνες","🏛️","Ο χώρος όπου λατρεύονταν ένας θεός, με ναό και βωμό.","Εκεί γίνονταν οι θυσίες."],
+["thysia","Θυσία","Γιορτές και αγώνες","🔥","Προσφορά στον θεό. Οι αρχαίοι πρόσφεραν ζώα, καρπούς ή άλλα δώρα.","Μετά τις θυσίες ακολουθούσε χορός και τραγούδι."],
+["choros","Χορωδία","Έννοιες","👥","Ομάδα ανθρώπων που τραγουδούν μαζί.","Η χορωδία έψαλλε ύμνους στην πομπή."],
+["paian","Παιάνας","Έννοιες","🛡️","Πολεμικό τραγούδι που έδινε θάρρος στους στρατιώτες πριν και κατά τη μάχη.","Οι πολεμικοί παιάνες εμψύχωναν τους στρατιώτες."],
+["rythm","Ρυθμός","Έννοιες","🥁","Ο κανονικός παλμός της μουσικής, που μας βοηθά να κινούμαστε όλοι μαζί.","Ο τυμπανιστής έδινε τον ρυθμό στους κωπηλάτες."],
+["aggeio","Αγγειογραφία","Έννοιες","🖼️","Η ζωγραφική πάνω σε αγγεία. Μας δείχνει πώς ζούσαν και έπαιζαν μουσική οι αρχαίοι.","Η σκηνή του Λίνου και του Ιφικλή είναι αγγειογραφία."]
+];
+const T={p1:"Για τους αρχαίους Έλληνες, η μουσική δεν ήταν απλώς μια μορφή ψυχαγωγίας, αλλά μία από τις πιο αγαπητές και σπουδαίες τέχνες, με [[theia|θεϊκή προέλευση]]. Τα [[arch|αρχαιολογικά ευρήματα]] αποδεικνύουν ότι αποτελούσε αναπόσπαστο κομμάτι της ζωής τους, συντροφεύοντάς τους αδιάκοπα από τη γέννηση έως και τον θάνατο.",
+p2:"Στην [[idiot|ιδιωτική και κοινωνική ζωή]], η μουσική κυριαρχούσε παντού: στα [[sympo|συμπόσια]], στους [[gyn|γυναικωνίτες]], στους γάμους, ακόμη και στις εργασίες τους ή στις στιγμές πένθους. Οι άνθρωποι τραγουδούσαν και έπαιζαν όργανα σε κάθε περίσταση.",
+p3:"Ιδιαίτερα σημαντική ήταν η θέση της μουσικής στην [[ekpaid|εκπαίδευση των νέων]]. Στην αρχαία Ελλάδα, η εκπαίδευση περιελάμβανε βασικά τη μουσική και τη γυμναστική. Οι αρχαίοι θεωρούσαν [[amor|αμόρφωτο]] όποιον δεν ήξερε να παίζει κάποιο μουσικό όργανο και να τραγουδά. Ενδεικτικό της αξίας που απέδιδαν στη γνώση αυτή είναι το παράδειγμα του μεγάλου φιλοσόφου [[sokr|Σωκράτη]], ο οποίος, επειδή δεν γνώριζε μουσική, άρχισε να παρακολουθεί μαθήματα μουσικής σε μεγάλη ηλικία για να συμπληρώσει τη μόρφωσή του."};
+const M={};D.forEach(d=>M[d[0]]=d);
+const $=s=>document.querySelector(s);
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ς/g,"σ");
+for(const k in T)$("#"+k).innerHTML=T[k].replace(/\[\[(\w+)\|([^\]]+)\]\]/g,(_,key,txt)=>`<button class="t ${M[key][6]?"m":""}" onclick="show('${key}')">${txt}</button>`);
+let cat="Όλα",allOpen=false;
+D.sort((a,b)=>a[1].localeCompare(b[1],"el"));
+function cardBody(d){return `<p>${d[4]}</p><div class="ex">💬 ${d[5]}</div>`}
+function render(){
+ const q=norm($("#q").value.trim());
+ const r=D.filter(d=>(cat=="Όλα"||d[2]==cat)&&(!q||norm(d[1]+" "+d[4]).includes(q)));
+ $("#n").textContent=r.length+" όροι";
+ $("#list").innerHTML=r.length?r.map(d=>`<div class="c ${allOpen?"open":""}" id="c-${d[0]}"><button onclick="this.parentNode.classList.toggle('open')"><span class="em">${d[3]}</span>${d[1]}<span class="tag">${d[2]}</span></button><div class="body">${cardBody(d)}</div></div>`).join(""):`<div class="none">Δεν βρέθηκε όρος. Δοκίμασε άλλη λέξη 🙂</div>`;
+}
+$("#chips").innerHTML=CATS.map(c=>`<button class="chip ${c==cat?"on":""}" data-c="${c}">${c}</button>`).join("");
+$("#chips").onclick=e=>{const c=e.target.dataset.c;if(!c)return;cat=c;[...$("#chips").children].forEach(b=>b.classList.toggle("on",b.dataset.c==c));render()};
+$("#q").oninput=render;
+$("#tg").onclick=()=>{allOpen=!allOpen;$("#tg").textContent=allOpen?"Κλείσιμο όλων":"Άνοιγμα όλων";document.querySelectorAll(".c").forEach(c=>c.classList.toggle("open",allOpen))};
+function show(k){
+ const d=M[k];
+ $("#sb").innerHTML=`<h3>${d[3]} ${d[1]}</h3><div class="hint">${d[2]}</div>${cardBody(d)}<button class="btn" style="margin-top:8px" onclick="goTo('${k}')">Δες στη λίστα ↓</button>`;
+ $("#sheet").classList.add("show");
+}
+function goTo(k){
+ cat="Όλα";$("#q").value="";[...$("#chips").children].forEach(b=>b.classList.toggle("on",b.dataset.c=="Όλα"));render();
+ $("#sheet").classList.remove("show");
+ const c=$("#c-"+k);c.classList.add("open","flash");c.scrollIntoView({block:"center"});setTimeout(()=>c.classList.remove("flash"),1800);
+}
+$("#x").onclick=()=>$("#sheet").classList.remove("show");
+render();
+</script>
+</body>
+</html>
