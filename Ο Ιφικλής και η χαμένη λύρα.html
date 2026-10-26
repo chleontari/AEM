@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ο Ιφικλής και η χαμένη λύρα</title>
+<style>
+:root{--bg:#f6ecd9;--card:#fffaf0;--ink:#2b1d14;--acc:#b9482a;--gold:#d9a441;--ok:#2e7d4f;--bad:#b3261e;--line:#e0cfae;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1611;--card:#2a2019;--ink:#f3e6cf;--acc:#e0714b;--gold:#e5b655;--ok:#6cc28a;--bad:#ff8a80;--line:#4a3a2c}}
+:root[data-theme="dark"]{--bg:#1d1611;--card:#2a2019;--ink:#f3e6cf;--acc:#e0714b;--gold:#e5b655;--ok:#6cc28a;--bad:#ff8a80;--line:#4a3a2c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Palatino Linotype",serif;line-height:1.5;font-size:18px}
+#app{max-width:720px;margin:0 auto;padding:14px}
+.meander{height:12px;background:repeating-linear-gradient(90deg,var(--acc) 0 14px,transparent 14px 20px,var(--acc) 20px 24px,transparent 24px 34px);opacity:.8;border-radius:3px;margin:6px 0 12px}
+h1{font-size:1.7rem;margin:.3em 0;color:var(--acc)}
+h2{margin:.2em 0;font-size:1.35rem}
+h3{font-size:1.05rem;margin:.2em 0 .6em}
+.art{font-size:2.6rem;text-align:center;padding:16px 8px;border-radius:14px;letter-spacing:.2em;border:2px solid var(--line)}
+.box{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.say{border-left:5px solid var(--gold)}
+.inv{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.slot{width:38px;height:38px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-size:1.3rem}
+.slot.on{border:2px solid var(--gold);background:var(--card)}
+.op,.go,.next{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin:7px 0;cursor:pointer}
+.op:hover{border-color:var(--acc)}
+.op.picked{background:var(--acc);color:#fff;border-color:var(--acc)}
+.go,.next{background:var(--acc);color:#fff;text-align:center;font-weight:bold;border-color:var(--acc)}
+.next{background:var(--ok);border-color:var(--ok)}
+.row{display:flex;gap:8px;align-items:center;margin:7px 0;flex-wrap:wrap}.row span{flex:1 1 140px;font-weight:bold}
+select{font:inherit;padding:8px;border-radius:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink);flex:1 1 180px;max-width:100%}
+.fb{margin-top:8px;font-size:.95rem}.good{color:var(--ok)}.bad{color:var(--bad)}
+.pz.done{opacity:.75}
+#pulse{width:80px;height:80px;border-radius:50%;background:var(--gold);margin:10px auto;display:grid;place-items:center;font-size:2rem;transition:transform .12s}
+#pulse.beat{transform:scale(1.3)}
+.center{text-align:center}
+.small{font-size:.85rem;opacity:.8}
+@media (max-width:480px){body{font-size:17px}.art{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const S=[
+{t:"Η Αγορά",art:"🏛️ 🧓 📜 👥",bg:"linear-gradient(#f2c78a,#e9a66b)",key:"📜",kn:"Πάπυρος του ραψωδού",
+story:"Ο Ιφικλής τρέχει στην αγορά. Ένας ραψωδός στέκεται όρθιος και απαγγέλλει έπη, ενώ η κιθάρα του τον συνοδεύει. Οι πολίτες τον ακούν με κομμένη την ανάσα. «Νεαρέ», λέει, «θα σου δείξω τον δρόμο, αν πρώτα απαντήσεις!»",
+P:[{t:"mc",q:"Τι κάνει ο ραψωδός;",o:["Χορεύει με τους πολίτες","Απαγγέλλει έπη με συνοδεία κιθάρας","Παίζει μόνο αυλό, χωρίς λόγια","Πουλάει λύρες"],a:1,h:"Άκου τι κάνει: μιλά (απαγγέλλει) και παίζει κιθάρα ταυτόχρονα.",f:"Σωστά! Ο ραψωδός απαγγέλλει έπη με συνοδεία κιθάρας."},
+{t:"mc",q:"Με ποιον αγώνα έκλειναν οι μουσικοί αγώνες στις μεγάλες γιορτές;",o:["Αγώνες ραψωδίας","Αγώνες δρόμου","Αγώνες κιθαρωδίας","Αγώνες χορού"],a:0,h:"Είναι ο αγώνας των ανθρώπων που βλέπεις μπροστά σου!",f:"Ακριβώς! Οι γιορτές έκλειναν με αγώνες ραψωδίας."}]},
+{t:"Ο Γυναικωνίτης",art:"🏠 🪟 👰 🎶",bg:"linear-gradient(#f5d7d0,#e9b3b0)",key:"🌸",kn:"Λουλούδι της νύφης",
+story:"Ο Ιφικλής περνά από σπίτια με ανοιχτά παράθυρα. Από ψηλά ακούγονται φωνές και όργανα! Στον γυναικωνίτη μια ομάδα γυναικών στολίζει μια νύφη και τραγουδά γαμήλια τραγούδια. Μια γυναίκα σκύβει από το παράθυρο: «Ξέρεις πότε χρειαζόμαστε τη μουσική;»",
+P:[{t:"multi",q:"Σε ποιες στιγμές της ζωής ήταν απαραίτητη η μουσική στην αρχαία Ελλάδα; (Διάλεξε όλες τις σωστές)",o:["Στους γάμους","Στα συμπόσια","Στον θάνατο","Στην τηλεόραση","Στις διάφορες εργασίες"],a:[0,1,2,4],h:"Στην αρχαιότητα δεν υπήρχε τηλεόραση! Η μουσική όμως συνόδευε σχεδόν όλη τη ζωή.",f:"Η μουσική ήταν «αναπόσπαστο κομμάτι» της ζωής τους, από τη γέννηση ως τον θάνατο."}]},
+{t:"Το Αρχαίο Θέατρο",art:"🎭 🏟️ 🎺 🎶",bg:"linear-gradient(#cfd8e8,#9fb4d4)",key:"🌿",kn:"Στεφάνι νικητή",
+story:"Ο Ιφικλής φτάνει στο αρχαίο θέατρο. Οι μουσικοί κουρδίζουν και ζεσταίνονται για τους αγώνες της γιορτής. Ένας κριτής φρουρεί τις σκάλες: «Για να περάσεις, πρέπει να ξέρεις πώς γίνεται η γιορτή και οι αγώνες!»",
+P:[{t:"match",q:"Βάλε σε σειρά τα βήματα της γιορτής του θεού.",items:["Θυσίες στο ιερό του θεού","Η πομπή με τους ύμνους διασχίζει την πόλη","Χορός και τραγούδι"],o:["1ο","2ο","3ο"],a:[1,0,2],h:"Πρώτα όλοι περπατούν ψάλλοντας, μετά φτάνουν στο ιερό.",f:"Πομπή με ύμνους, θυσίες στο ιερό και μετά χορός και τραγούδι!"},
+{t:"match",q:"Ταίριαξε κάθε αγώνα με αυτό που κάνει ο μουσικός.",items:["Αυλητική","Αυλωδία","Κιθαριστική","Κιθαρωδία"],o:["Τραγουδώ και παίζω κιθάρα","Παίζω μόνο αυλό","Τραγουδώ και παίζω αυλό","Παίζω μόνο κιθάρα"],a:[1,2,3,0],h:"Αν υπάρχει «ωδία» (ωδή = τραγούδι), ο μουσικός τραγουδά και παίζει.",f:"Η λέξη «ωδία» σημαίνει ότι ο μουσικός και τραγουδά!"},
+{t:"mc",q:"Τι βραβείο έπαιρνε συνήθως ο νικητής;",o:["Ένα χρυσό ρολόι","Ένα στεφάνι από ελιά, κισσό ή μυρτιά","Ένα καλάθι γλυκά","Ένα μετάλλιο"],a:1,h:"Το βραβείο ήταν φτιαγμένο από φυτά.",f:"Στεφάνι από ελιά, κισσό ή μυρτιά!"}]},
+{t:"Το Λιμάνι",art:"⚓ ⛵ 🥁 🌊",bg:"linear-gradient(#bfe3ee,#6fb4cf)",key:"🥁",kn:"Ραβδί του ρυθμού",
+story:"Στο λιμάνι ένα πλοιάριο ετοιμάζεται να φύγει. Στην πλώρη ένας τυμπανιστής δίνει τον ρυθμό και οι κωπηλάτες απαντούν με μια ρυθμική κραυγή! «Βοήθησέ μας», φωνάζει ο καπετάνιος, «κράτα τον ρυθμό κι άνοιξε τον δρόμο!»",
+P:[{t:"rhythm",q:"Χτύπα το τύμπανο ακριβώς όταν ο κύκλος μεγαλώνει! Κάνε 5 σωστά χτυπήματα.",h:"",f:"Μπράβο! Όλοι κωπηλατούν μαζί χάρη στον ρυθμό."}]},
+{t:"Τα Χωράφια",art:"🌾 🧑‍🌾 🎵 ☀️",bg:"linear-gradient(#f7e7a0,#e0c05a)",key:"🌾",kn:"Στάχυ της δουλειάς",
+story:"Ο Ιφικλής βγαίνει από τα τείχη. Στα χωράφια οι γεωργοί σκύβουν και σηκώνονται τραγουδώντας ρυθμικά, και όλοι οι κινήσεις τους ταιριάζουν. Ένας γέρος αγρότης σταματά και σε ρωτά: «Ξέρεις γιατί τραγουδάμε την ώρα της δουλειάς;»",
+P:[{t:"mc",q:"Γιατί τραγουδούσαν οι εργάτες την ώρα της χειρωνακτικής δουλειάς;",o:["Για να δουλεύουν όλοι στον ίδιο ρυθμό και να περνά πιο ευχάριστα ο κόπος","Επειδή ήταν υποχρεωτικό από τον νόμο","Για να μην ακούν τον κόσμο γύρω τους","Για να διώχνουν τους ταξιδιώτες"],a:0,h:"Σκέψου το λιμάνι! Ο ρυθμός βοηθά όλους να κινούνται μαζί.",f:"Η μουσική συνόδευε τις εργασίες τους και τις έκανε πιο εύκολες!"}]},
+{t:"Το Δέντρο της Λύρας",art:"🌳 🪕 ✨",bg:"linear-gradient(#cde8c1,#8fc182)",key:"🎼",kn:"Η λύρα του Ιφικλή",
+story:"Επιτέλους! Στη ρίζα της γέρικης ελιάς κρέμεται η λύρα του Ιφικλή. Μια φωνή ακούγεται από τα κλαδιά: «Η λύρα είναι δική σου, αν θυμάσαι τι έμαθες για τη μουσική!»",
+P:[{t:"mc",q:"Τι πίστευαν οι αρχαίοι Έλληνες για την προέλευση της μουσικής;",o:["Ότι την ανακάλυψαν οι ναύτες","Ότι είχε θεϊκή προέλευση","Ότι ήρθε από άλλη χώρα","Ότι ήταν μόνο για παιδιά"],a:1,h:"Ο Απόλλωνας και οι Μούσες ήταν θεοί της μουσικής.",f:"Η μουσική ήταν δώρο των θεών!"},
+{t:"mc",q:"Ποιος θεός ήταν ο προστάτης της μουσικής και της λύρας;",o:["Ο Άρης","Ο Ποσειδώνας","Ο Απόλλωνας","Ο Ήφαιστος"],a:2,h:"Στη βάση της Μαντινείας αυτός ο θεός διαγωνίζεται με τον Μαρσύα.",f:"Ο Απόλλωνας παίζει λύρα, ο Μαρσύας αυλό, στη βάση της Μαντινείας."},
+{t:"mc",q:"Πώς θεωρούσαν στην αρχαιότητα όποιον δεν ήξερε να παίζει ένα όργανο και να τραγουδά;",o:["Αμόρφωτο","Πολύ σοφό","Ήρωα","Βασιλιά"],a:0,h:"Η μουσική ήταν από τα βασικά μαθήματα της εκπαίδευσης.",f:"Γι’ αυτό ο Σωκράτης άρχισε μαθήματα μουσικής σε μεγάλη ηλικία!"}]}
+];
+let sc=-1,tok=[],miss=0,done=[],tm=null,au=null;
+const app=document.getElementById("app");
+const inv=()=>`<div class="inv"><b>Κλειδιά:</b>${S.slice(0,6).map((s,i)=>`<div class="slot ${tok[i]?"on":""}" title="${tok[i]?s.kn:"κλειδωμένο"}">${tok[i]?s.key:"🔒"}</div>`).join("")}</div>`;
+function start(){sc=-1;tok=[];miss=0;go(0)}
+function go(n){clearInterval(tm);sc=n;done=[];draw();scrollTo(0,0)}
+function draw(){
+ if(sc<0){return}
+ if(sc>=S.length){return end()}
+ const s=S[sc];
+ app.innerHTML=`<div class="meander"></div>${inv()}
+ <div class="art" style="background:${s.bg};color:#000">${s.art}</div>
+ <h2>Σκηνή ${sc+1}/${S.length}: ${s.t}</h2>
+ <div class="box say">${s.story}</div>
+ ${s.P.map(card).join("")}
+ <div id="nx"></div>`;
+}
+function card(p,i){
+ let h=`<div class="box pz" id="pz${i}"><h3>${p.q}</h3>`;
+ if(p.t=="mc")h+=p.o.map((o,j)=>`<button class="op" onclick="mc(${i},${j})">${o}</button>`).join("");
+ if(p.t=="multi")h+=p.o.map((o,j)=>`<label class="op"><input type="checkbox" value="${j}"> ${o}</label>`).join("")+`<button class="go" onclick="chk(${i})">Έλεγχος ✔</button>`;
+ if(p.t=="match")h+=p.items.map(it=>`<div class="row"><span>${it}</span><select><option value="">Διάλεξε…</option>${p.o.map((o,k)=>`<option value="${k}">${o}</option>`).join("")}</select></div>`).join("")+`<button class="go" onclick="chk(${i})">Έλεγχος ✔</button>`;
+ if(p.t=="rhythm")h+=`<div id="pulse">🥁</div><div class="center" id="cnt">Σωστά χτυπήματα: 0/5</div><button class="go" id="rb" onclick="rstart(${i})">▶ Ξεκίνα τον ρυθμό</button><button class="op center" id="tap" style="display:none" onclick="tap(${i})">🥁 ΧΤΥΠΑ!</button>`;
+ return h+`<div class="fb" id="fb${i}"></div></div>`;
+}
+function ok(i){
+ const p=S[sc].P[i];done[i]=true;
+ const c=document.getElementById("pz"+i);c.classList.add("done");
+ c.querySelectorAll("button,select,input").forEach(e=>e.disabled=true);
+ document.getElementById("fb"+i).innerHTML=`<span class="good">✅ ${p.f}</span>`;
+ if(S[sc].P.every((_,k)=>done[k])){
+  tok[sc]=true;
+  document.getElementById("nx").innerHTML=`<div class="box center"><div style="font-size:2.4rem">${S[sc].key}</div><b>Κέρδισες: ${S[sc].kn}!</b></div><button class="next" onclick="go(${sc+1})">${sc==S.length-1?"Πάρε τη λύρα 🎶":"Συνέχισε τον δρόμο ➜"}</button>`;
+  document.getElementById("nx").scrollIntoView({behavior:"smooth",block:"center"});
+  document.querySelector(".inv").outerHTML=inv();
+ }
+}
+function bad(i){miss++;document.getElementById("fb"+i).innerHTML=`<span class="bad">❌ Όχι ακόμα! 💡 ${S[sc].P[i].h}</span>`}
+function mc(i,j){S[sc].P[i].a==j?ok(i):bad(i)}
+function chk(i){
+ const p=S[sc].P[i],c=document.getElementById("pz"+i);let r;
+ if(p.t=="multi"){const v=[...c.querySelectorAll("input:checked")].map(e=>+e.value);r=v.length==p.a.length&&p.a.every(x=>v.includes(x))}
+ else{const v=[...c.querySelectorAll("select")].map(e=>e.value);r=v.every((x,k)=>x!==""&&+x==p.a[k])}
+ r?ok(i):bad(i);
+}
+let good=0,last=0;
+function thump(){try{au=au||new(window.AudioContext||window.webkitAudioContext)();const o=au.createOscillator(),g=au.createGain();o.frequency.value=110;g.gain.setValueAtTime(.5,au.currentTime);g.gain.exponentialRampToValueAtTime(.001,au.currentTime+.2);o.connect(g);g.connect(au.destination);o.start();o.stop(au.currentTime+.2)}catch(e){}}
+function rstart(i){
+ good=0;document.getElementById("rb").style.display="none";document.getElementById("tap").style.display="block";
+ const pl=document.getElementById("pulse");
+ const b=()=>{last=performance.now();pl.classList.add("beat");thump();setTimeout(()=>pl.classList.remove("beat"),140)};
+ b();tm=setInterval(b,900);
+}
+function tap(i){
+ const d=performance.now()-last,e=Math.min(d,900-d);
+ const f=document.getElementById("fb"+i);
+ if(e<280){good++;document.getElementById("cnt").textContent="Σωστά χτυπήματα: "+good+"/5";f.innerHTML=`<span class="good">👍 Στον ρυθμό!</span>`;
+  if(good>=5){clearInterval(tm);ok(i)}}
+ else{miss++;f.innerHTML=`<span class="bad">❌ Λίγο νωρίς ή αργά! Περίμενε να μεγαλώσει ο κύκλος.</span>`}
+}
+function end(){
+ const st=miss<=3?3:miss<=8?2:1;
+ app.innerHTML=`<div class="meander"></div>${inv()}
+ <div class="art" style="background:linear-gradient(#f2c78a,#d9a441);color:#000">🪕 🎶 🏺</div>
+ <h1>Ο Ιφικλής βρήκε τη λύρα του!</h1>
+ <div class="box say">Με τη λύρα στην αγκαλιά, ο Ιφικλής τρέχει στην οικία του Λίνου. Ο δάσκαλος χαμογελά: «Άργησες λίγο, αλλά πέρασες την πόλη και είδες πώς η μουσική ζει παντού: στην αγορά, στους γάμους, στις γιορτές, στη δουλειά. Έλα να παίξουμε!»</div>
+ <div class="box center"><div style="font-size:2.4rem">${"⭐".repeat(st)}${"☆".repeat(3-st)}</div><b>Λάθη στη διαδρομή: ${miss}</b></div>
+ <div class="box"><h3>🤔 Σκέψου και συζήτησε</h3><p>1. Τι ρόλο παίζει η μουσική στη δική σου ζωή; Γράψε τρεις δραστηριότητες στις οποίες σου είναι απαραίτητη.</p><p>2. Γίνονται σήμερα μουσικοί αγώνες; Ποια είναι τα έπαθλα για τους νικητές;</p><p>3. Τι πρέπει να γνωρίζει κάποιος σήμερα για να θεωρείται μορφωμένος;</p></div>
+ <button class="go" onclick="start()">↺ Παίξε ξανά</button>`;
+}
+function intro(){
+ app.innerHTML=`<div class="meander"></div>
+ <div class="art" style="background:linear-gradient(#f2c78a,#e9a66b);color:#000">🏺 🪕 🏛️</div>
+ <h1>Ο Ιφικλής και η χαμένη λύρα</h1>
+ <div class="box say">Αρχαία Ελλάδα. Ο Ιφικλής, ένας μαθητής σαν εσένα, έχει σήμερα μάθημα λύρας στην οικία του δασκάλου του, του Λίνου. Μα η λύρα δεν είναι πουθενά! Τη θυμάται κρεμασμένη στο δέντρο έξω από τα τείχη της πόλης.<br><br>Βοήθησέ τον να διασχίσει την πόλη. Σε κάθε σκηνή λύσε το αίνιγμα για να κερδίσεις ένα κλειδί και να ανοίξει ο δρόμος.</div>
+ <button class="next" onclick="start()">Ξεκινάμε την περιπέτεια ➜</button>
+ <p class="small center">Βασισμένο στην ενότητα 9 «Η ελληνική μουσική στους αιώνες» – Μουσική ΣΤʼ Δημοτικού</p>`;
+}
+intro();
+</script>
+</body>
+</html>
