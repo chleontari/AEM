@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Μουσικόν Όργανον – Αρχαία Ελληνική Μουσική</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=GFS+Didot&display=swap" rel="stylesheet">
+<style>
+:root{--clay:#8a3b1e;--clay-d:#4a1d0e;--black:#1b100b;--gold:#e2b04a;--cream:#f3e3c3;--sea:#2f6f7a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--cream);font-family:"GFS Didot",Georgia,serif;
+background:radial-gradient(circle at 50% 0,var(--clay) 0,var(--clay-d) 70%,var(--black) 100%) fixed}
+.meander{height:26px;background:var(--black) url("data:image/svg:xml;utf8,") ;
+background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26'><path d='M2 24V2h22v18H8V8h10v6' fill='none' stroke='%23e2b04a' stroke-width='2.5'/></svg>");
+border-block:3px solid var(--gold)}
+header{text-align:center;padding:22px 12px 6px}
+h1{font-family:Cinzel,"GFS Didot",serif;letter-spacing:.12em;margin:0;font-size:clamp(1.4rem,5vw,2.6rem);color:var(--gold);text-shadow:0 2px 0 #000}
+header p{margin:6px 0 0;opacity:.85;font-style:italic}
+main{max-width:980px;margin:0 auto;padding:16px;display:grid;gap:20px;grid-template-columns:1fr 1.1fr}
+@media(max-width:760px){main{grid-template-columns:1fr}}
+.panel{background:rgba(27,16,11,.78);border:3px solid var(--gold);border-radius:14px 14px 4px 4px;padding:16px;box-shadow:0 8px 24px #000a}
+.player{text-align:center}
+.disc{width:min(220px,60vw);aspect-ratio:1;margin:6px auto 14px;border-radius:50%;position:relative;
+background:radial-gradient(circle,var(--gold) 0 16%,var(--black) 17% 22%,var(--clay) 23% 55%,var(--black) 56% 60%,var(--clay) 61% 90%,var(--gold) 91% 94%,var(--black) 95%);
+border:4px solid var(--gold);display:grid;place-items:center;font-size:2.6rem;animation:spin 6s linear infinite;animation-play-state:paused}
+.disc.on{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
+.now{font-family:Cinzel,serif;color:var(--gold);min-height:3em;font-size:1.1rem;margin:4px 0}
+.ctrl{display:flex;gap:10px;justify-content:center;margin:10px 0}
+button{font:inherit;cursor:pointer;color:var(--cream);background:var(--clay-d);border:2px solid var(--gold);border-radius:8px;padding:8px 14px}
+button:hover{background:var(--clay)}
+button.big{font-size:1.5rem;min-width:64px}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.time{display:flex;justify-content:space-between;font-size:.85rem;opacity:.8}
+.vol{display:flex;align-items:center;gap:8px;margin-top:8px}
+h2{font-family:Cinzel,serif;color:var(--gold);margin:0 0 10px;font-size:1.1rem;letter-spacing:.08em}
+ol{list-style:none;margin:0;padding:0;max-height:430px;overflow-y:auto}
+li button{width:100%;text-align:left;display:flex;gap:10px;align-items:center;margin-bottom:6px;background:rgba(138,59,30,.35)}
+li button.cur{background:var(--gold);color:var(--black)}
+.num{font-family:Cinzel,serif;min-width:2.2em;text-align:center;border:1px solid currentColor;border-radius:50%;padding:2px 0;font-size:.85rem}
+.load{margin-top:12px;padding-top:12px;border-top:1px dashed var(--gold);font-size:.9rem}
+.load label{display:inline-block;cursor:pointer;background:var(--sea);border:2px solid var(--gold);border-radius:8px;padding:8px 12px;margin-top:6px}
+.empty{opacity:.85;font-style:italic;padding:8px 2px}
+footer{text-align:center;padding:14px 16px 30px;opacity:.8;font-size:.85rem;line-height:1.6;max-width:760px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="meander"></div>
+<header>
+  <h1>ΜΟΥΣΙΚΟΝ ΟΡΓΑΝΟΝ</h1>
+  <p>Μελωδίες της Αρχαίας Ελλάδας – ανασυνθέσεις αρχαίων μελών</p>
+</header>
+<main>
+  <section class="panel player">
+    <div class="disc" id="disc">𝄞</div>
+    <div class="now" id="now">Επίλεξε ένα μέλος από τον κατάλογο</div>
+    <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
+    <div class="time"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+    <div class="ctrl">
+      <button id="prev" title="Προηγούμενο">⏮</button>
+      <button id="play" class="big" title="Αναπαραγωγή / Παύση">▶</button>
+      <button id="next" title="Επόμενο">⏭</button>
+    </div>
+    <div class="vol">🔈<input type="range" id="vol" min="0" max="1" step="0.01" value="0.8">🔊</div>
+  </section>
+
+  <section class="panel">
+    <h2>ΚΑΤΑΛΟΓΟΣ ΜΕΛΩΝ</h2>
+    <ol id="list"><li class="empty">Ο κατάλογος είναι άδειος. Φόρτωσε τα αρχεία ήχου παρακάτω.</li></ol>
+    <div class="load">
+      Θέλεις να ακούσεις άλλα αρχεία από τον υπολογιστή σου;<br>
+      <label>📜 Φόρτωση τραγουδιών<input id="files" type="file" accept="audio/*" multiple hidden></label>
+    </div>
+  </section>
+</main>
+<footer>
+  «Μουσική γάρ ψυχή τέρψις»<br>
+  Η μουσική προέρχεται από τον δίσκο <em>«Λύρα Βάρβιτος»</em> της σειράς <em>«Αρχαία Ελληνικά Όργανα»</em> του Πέτρου Ταμπούρη, με ρεπλίκες αρχαίων μελωδιών.<br>
+  Τα δικαιώματα ανήκουν στους δημιουργούς και τους κατόχους τους. Η χρήση γίνεται αποκλειστικά για εκπαιδευτικούς σκοπούς, χωρίς κερδοσκοπικό χαρακτήρα.
+</footer>
+<div class="meander"></div>
+<audio id="a"></audio>
+
+<script>
+const $=id=>document.getElementById(id), a=$('a');
+// Πρόσθεσε εδώ τα τραγούδια: {title:'Τίτλος', file:'όνομα-αρχείου.mp3'} (τα αρχεία στον ίδιο φάκελο με το index.html)
+const SONGS=[
+  {title:'Λύρα',file:'Lyre.mp3'},
+  {title:'Ήχος διατονικός',file:'ήχος διατονικός.wav'},
+  {title:'Αμφίβραχυς',file:'amfivraxis.wav'}
+];
+let tracks=SONGS.map(d=>({title:d.title,url:encodeURI(d.file)})), idx=-1;
+const fmt=s=>isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
+const clean=n=>n.replace(/\.[^.]+$/,'').replace(/[_]+/g,' ').trim();
+
+$('files').onchange=e=>{
+  const fs=[...e.target.files].sort((x,y)=>x.name.localeCompare(y.name,'el',{numeric:true}));
+  tracks.forEach(t=>URL.revokeObjectURL(t.url));
+  tracks=fs.map(f=>({title:clean(f.name),url:URL.createObjectURL(f)}));
+  idx=-1; render();
+};
+function render(){
+  const ol=$('list'); ol.innerHTML='';
+  if(!tracks.length){ol.innerHTML='<li class="empty">Ο κατάλογος είναι άδειος.</li>';return}
+  tracks.forEach((t,i)=>{
+    const li=document.createElement('li'), b=document.createElement('button');
+    b.className=i===idx?'cur':'';
+    b.innerHTML='<span class="num">'+(i+1)+'</span><span></span>';
+    b.lastChild.textContent=t.title;
+    b.onclick=()=>choose(i);
+    li.appendChild(b); ol.appendChild(li);
+  });
+}
+function choose(i){
+  if(!tracks.length)return;
+  idx=(i+tracks.length)%tracks.length;
+  a.src=tracks[idx].url; a.play().catch(()=>{});
+  $('now').textContent='♪ '+tracks[idx].title;
+  render();
+}
+$('play').onclick=()=>{ if(idx<0)return choose(0); a.paused?a.play():a.pause() };
+$('next').onclick=()=>choose(idx+1);
+$('prev').onclick=()=>choose(idx-1);
+a.onplay=()=>{$('play').textContent='⏸';$('disc').classList.add('on')};
+a.onpause=()=>{$('play').textContent='▶';$('disc').classList.remove('on')};
+a.onended=()=>choose(idx+1);
+a.onerror=()=>{$('now').textContent='⚠ Δεν φορτώθηκε το αρχείο (το Drive ή η σελίδα το μπλοκάρει)'};
+a.ontimeupdate=()=>{ $('cur').textContent=fmt(a.currentTime); if(a.duration)$('seek').value=a.currentTime/a.duration*100 };
+a.onloadedmetadata=()=>$('dur').textContent=fmt(a.duration);
+$('seek').oninput=e=>{ if(a.duration)a.currentTime=e.target.value/100*a.duration };
+$('vol').oninput=e=>a.volume=e.target.value; a.volume=.8;
+render();
+</script>
+</body>
+</html>
